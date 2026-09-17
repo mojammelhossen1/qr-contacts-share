@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">QuickQR</string>
+    <string name="save_image_button">Save Image</string>
+    <string name="share_qr_button">Share QR</string>
+    <string name="done_button">Done</string>
+    <string name="qr_code_content_desc">Contact QR Code</string>
+    <string name="error_invalid_vcard">Could not parse contact data.</string>
+    <string name="error_empty_vcard">No contact data found.</string>
+    <string name="toast_saved_to_gallery">QR code saved to Pictures/QuickQR</string>
+    <string name="toast_save_failed">Failed to save image</string>
+    <string name="mode_call_now">Call Now QR</string>
+    <string name="mode_vcard">Full Contact Card</string>
+    <string name="direct_call_badge">Direct Dial • Tap to Call Immediately</string>
+    <string name="vcard_badge">Standard vCard • Adds to Address Book</string>
+    <string name="direct_call_no_phone">No phone number detected in contact to dial.</string>
+</resources>
