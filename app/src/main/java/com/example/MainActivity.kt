@@ -708,25 +708,23 @@ fun QrDisplayView(
             }
         }
     } else {
-        // Portrait Mode: Clean vertical layout
-        val scrollState = rememberScrollState()
+        // Portrait Mode: Single-screen fit without scrolling
         var showRawVCard by remember { mutableStateOf(false) }
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(horizontal = 20.dp, vertical = 12.dp)
-                .widthIn(max = 600.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .widthIn(max = 500.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Mode Selector: Call Now QR vs Full Contact Card
+            // Top Section: Mode Selector TabRow
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("qr_mode_card"),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
@@ -734,7 +732,7 @@ fun QrDisplayView(
                     selectedTabIndex = if (state.mode == QrMode.CALL_NOW) 0 else 1,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(4.dp),
+                        .padding(2.dp),
                     containerColor = Color.Transparent,
                     divider = {}
                 ) {
@@ -760,10 +758,11 @@ fun QrDisplayView(
                                 Icon(
                                     imageVector = Icons.Default.Phone,
                                     contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(14.dp)
                                 )
                                 Text(
                                     text = stringResource(R.string.mode_call_now),
+                                    style = MaterialTheme.typography.labelMedium,
                                     fontWeight = if (state.mode == QrMode.CALL_NOW) FontWeight.Bold else FontWeight.Normal
                                 )
                             }
@@ -781,10 +780,11 @@ fun QrDisplayView(
                                 Icon(
                                     imageVector = Icons.Default.QrCode,
                                     contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(14.dp)
                                 )
                                 Text(
                                     text = stringResource(R.string.mode_vcard),
+                                    style = MaterialTheme.typography.labelMedium,
                                     fontWeight = if (state.mode == QrMode.VCARD) FontWeight.Bold else FontWeight.Normal
                                 )
                             }
@@ -793,30 +793,25 @@ fun QrDisplayView(
                 }
             }
 
-            // QR Code Card
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("qr_card"),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = BorderStroke(2.dp, Color(0xFF0F172A)),
-                shape = RoundedCornerShape(24.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            // Center Section: Compact, neatly framed QR Code Card & Status Pill
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(vertical = 4.dp)
             ) {
-                Column(
+                Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                        .size(210.dp)
+                        .testTag("qr_card"),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(2.dp, Color(0xFF0F172A)),
+                    shape = RoundedCornerShape(18.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.88f)
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White)
-                            .padding(8.dp),
+                            .fillMaxSize()
+                            .padding(12.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
@@ -828,195 +823,256 @@ fun QrDisplayView(
                             contentScale = ContentScale.Fit
                         )
                     }
+                }
 
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = if (state.mode == QrMode.CALL_NOW) Color(0xFFEFF6FF) else Color(0xFFF1F5F9),
-                        border = BorderStroke(
-                            1.dp,
-                            if (state.mode == QrMode.CALL_NOW) Color(0xFF93C5FD) else Color(0xFFCBD5E1)
-                        )
+                // Mode status pill badge below the QR code card
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = if (state.mode == QrMode.CALL_NOW) Color(0xFF1E293B) else Color(0xFF1E293B),
+                    border = BorderStroke(
+                        1.dp,
+                        if (state.mode == QrMode.CALL_NOW) Color(0xFF3B82F6) else Color(0xFF64748B)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = if (state.mode == QrMode.CALL_NOW) Icons.Default.Phone else Icons.Default.QrCode,
-                                contentDescription = null,
-                                tint = if (state.mode == QrMode.CALL_NOW) Color(0xFF1D4ED8) else Color(0xFF0F172A),
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = if (state.mode == QrMode.CALL_NOW) {
-                                    stringResource(R.string.direct_call_badge)
-                                } else {
-                                    stringResource(R.string.vcard_badge)
-                                },
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                                color = if (state.mode == QrMode.CALL_NOW) Color(0xFF1D4ED8) else Color(0xFF0F172A)
-                            )
-                        }
+                        Icon(
+                            imageVector = if (state.mode == QrMode.CALL_NOW) Icons.Default.Phone else Icons.Default.QrCode,
+                            contentDescription = null,
+                            tint = if (state.mode == QrMode.CALL_NOW) Color(0xFF60A5FA) else Color(0xFF94A3B8),
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Text(
+                            text = if (state.mode == QrMode.CALL_NOW) {
+                                stringResource(R.string.direct_call_badge)
+                            } else {
+                                stringResource(R.string.vcard_badge)
+                            },
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                letterSpacing = 0.2.sp
+                            ),
+                            color = if (state.mode == QrMode.CALL_NOW) Color(0xFF93C5FD) else Color(0xFFE2E8F0)
+                        )
                     }
                 }
             }
 
-            // Contact Details Card
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("contact_details_card"),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                shape = RoundedCornerShape(20.dp)
+            // Down Side Section: Clean Contact Details & Balanced Action Buttons
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                // Contact Details Card
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("contact_details_card"),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    // Header with Initials
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        val initials = getInitials(state.contact.fullName)
-                        Box(
-                            modifier = Modifier
-                                .size(52.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary),
-                            contentAlignment = Alignment.Center
+                        // Header: Avatar + Full Name + Role/Type + raw vCard toggle
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text(
-                                text = initials,
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                            )
-                        }
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = state.contact.fullName,
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            if (!state.contact.organization.isNullOrBlank() || !state.contact.title.isNullOrBlank()) {
-                                val role = listOfNotNull(state.contact.title, state.contact.organization).joinToString(" at ")
+                            val initials = getInitials(state.contact.fullName)
+                            Box(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary),
+                                contentAlignment = Alignment.Center
+                            ) {
                                 Text(
-                                    text = role,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    text = initials,
+                                    style = MaterialTheme.typography.titleSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                )
+                            }
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = state.contact.fullName,
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
+                                // Show role or clean type label - DO NOT duplicate phone/email here
+                                val role = if (!state.contact.organization.isNullOrBlank() || !state.contact.title.isNullOrBlank()) {
+                                    listOfNotNull(state.contact.title, state.contact.organization).joinToString(" at ")
+                                } else {
+                                    null
+                                }
+                                if (!role.isNullOrBlank()) {
+                                    Text(
+                                        text = role,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                             }
-                        }
-                    }
 
-                    // Phone Numbers
-                    if (state.contact.phoneNumbers.isNotEmpty()) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            state.contact.phoneNumbers.forEach { phone ->
-                                ContactRow(
-                                    icon = Icons.Default.Phone,
-                                    label = "Phone",
-                                    value = phone,
-                                    onCopy = {
-                                        clipboardManager.setText(AnnotatedString(phone))
-                                        Toast.makeText(context, "Phone copied", Toast.LENGTH_SHORT).show()
-                                    }
+                            // Compact vCard inspection toggle button
+                            IconButton(
+                                onClick = { showRawVCard = !showRawVCard },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = if (showRawVCard) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                    contentDescription = if (showRawVCard) "Hide Raw vCard" else "View Raw vCard",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
-                    }
 
-                    // Emails
-                    if (state.contact.emails.isNotEmpty()) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            state.contact.emails.forEach { email ->
-                                ContactRow(
-                                    icon = Icons.Default.Email,
-                                    label = "Email",
-                                    value = email,
-                                    onCopy = {
+                        // Phone Numbers
+                        state.contact.phoneNumbers.take(2).forEach { phone ->
+                            Surface(
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                                shape = RoundedCornerShape(10.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        clipboardManager.setText(AnnotatedString(phone))
+                                        Toast.makeText(context, "Phone number copied", Toast.LENGTH_SHORT).show()
+                                    }
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Phone,
+                                        contentDescription = "Phone",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                    Text(
+                                        text = phone,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Medium
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.ContentCopy,
+                                        contentDescription = "Copy phone",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        // Emails
+                        state.contact.emails.take(1).forEach { email ->
+                            Surface(
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                                shape = RoundedCornerShape(10.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
                                         clipboardManager.setText(AnnotatedString(email))
                                         Toast.makeText(context, "Email copied", Toast.LENGTH_SHORT).show()
                                     }
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Email,
+                                        contentDescription = "Email",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                    Text(
+                                        text = email,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Medium
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.ContentCopy,
+                                        contentDescription = "Copy email",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        // Collapsible Raw vCard overlay
+                        AnimatedVisibility(
+                            visible = showRawVCard,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(70.dp)
+                            ) {
+                                Text(
+                                    text = state.contact.qrPayload,
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontFamily = FontFamily.Monospace,
+                                        fontSize = 10.sp
+                                    ),
+                                    modifier = Modifier.padding(8.dp)
                                 )
                             }
                         }
                     }
-
-                    // Raw vCard toggle
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { showRawVCard = !showRawVCard }
-                            .padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = if (showRawVCard) "Hide Raw vCard" else "View Raw vCard",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Icon(
-                            imageVector = if (showRawVCard) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
-                    AnimatedVisibility(
-                        visible = showRawVCard,
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = state.contact.qrPayload,
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontFamily = FontFamily.Monospace,
-                                    fontSize = 11.sp
-                                ),
-                                modifier = Modifier.padding(12.dp)
-                            )
-                        }
-                    }
                 }
-            }
 
-            // Action Buttons
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
+                // Action Buttons: Two balanced buttons + Done button
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedButton(
                         onClick = onSaveImage,
                         modifier = Modifier
                             .weight(1f)
-                            .height(52.dp)
+                            .height(46.dp)
                             .testTag("save_image_button"),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
                     ) {
                         Icon(
@@ -1027,7 +1083,9 @@ fun QrDisplayView(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = stringResource(R.string.save_image_button),
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1
                         )
                     }
 
@@ -1035,9 +1093,9 @@ fun QrDisplayView(
                         onClick = onShareQr,
                         modifier = Modifier
                             .weight(1f)
-                            .height(52.dp)
+                            .height(46.dp)
                             .testTag("share_qr_button"),
-                        shape = RoundedCornerShape(14.dp)
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Share,
@@ -1047,7 +1105,9 @@ fun QrDisplayView(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = stringResource(R.string.share_qr_button),
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1
                         )
                     }
                 }
@@ -1056,9 +1116,9 @@ fun QrDisplayView(
                     onClick = onDone,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp)
+                        .height(42.dp)
                         .testTag("done_button"),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
@@ -1067,17 +1127,16 @@ fun QrDisplayView(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = stringResource(R.string.done_button),
+                        style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
